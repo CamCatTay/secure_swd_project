@@ -2,14 +2,16 @@ import http.server
 import ssl
 
 # generate a test certificate
-# openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=localhost"
+# openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost"
 
 class SimpleHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
+        body = b'{"status": "success"}'
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
         self.end_headers()
-        self.wfile.write(b'{"status": "success"}')
+        self.wfile.write(body)
 
 server_address = ('localhost', 8443)
 httpd = http.server.HTTPServer(server_address, SimpleHandler)

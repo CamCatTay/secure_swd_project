@@ -17,10 +17,25 @@ def insecure_example():
 
 # Fixed Code Snippet
 def fixed_example():
-    # secure implementation: verify=True (or specifying a path to a trusted CA bundle <-- contains root and intermediate certificates)
+    # secure implementation: verify=True (or specifying a path to a trusted CA bundle)
     # enforces strict TLS certificate verification
     response = requests.get("https://localhost:8443/", verify="cert.pem")
     return response.json()
 
-print(insecure_example) # output: {'status': 'success'} (Succeeds because validation is disabled)
-#print(fixed_example) # output {'status': 'success} (Succeeds because validation is explicitly allowed)
+
+def invalid_example():
+        response = requests.get("https://localhost:8443/", verify=True)
+        return response.json()
+
+def main ():
+    print("Insecure output: ", insecure_example()) # output: {'status': 'success'} (Succeeds because validation is disabled)
+    print("Secure output: ", fixed_example()) # output {'status': 'success} (Succeeds because validation is explicitly allowed)
+
+    # output <error> (Fails because verify=True uses pythons default trusted certificate store not the one we created)
+    try:
+        print("Invalid output: ", invalid_example())
+    except requests.exceptions.SSLError as e:
+        print("Invalid example correctly rejected the certificate:", e)
+
+# init
+main()
